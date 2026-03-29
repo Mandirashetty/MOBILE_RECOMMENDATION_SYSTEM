@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Mobile Recommendation System</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+text-align:center;
+background:linear-gradient(120deg,#89f7fe,#66a6ff);
+}
+
+.dark{
+background:#121212;
+color:white;
+}
+
+.container{
+width:90%;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:15px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+display:inline-block;
+width:220px;
+}
+
+.dark .card{
+background:#1e1e1e;
+}
+
+img{
+width:120px;
+height:150px;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+background:#ff4b2b;
+color:white;
+cursor:pointer;
+margin:5px;
+}
+
+button:hover{
+background:#ff416c;
+}
+
+input{
+padding:8px;
+margin:5px;
+border-radius:5px;
+border:1px solid gray;
+}
+
+.compare{
+display:flex;
+justify-content:center;
+gap:30px;
+flex-wrap:wrap;
+}
+
+.cart{
+background:#fff3cd;
+padding:10px;
+border-radius:10px;
+margin:20px;
+}
+
+.dark .cart{
+background:#333;
+}
+
+#suggestions div{
+background:white;
+padding:5px;
+cursor:pointer;
+}
+
+.dark #suggestions div{
+background:#444;
+}
+
+@media(max-width:700px){
+
+.card{
+width:90%;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+{% if page=="login" %}
+
+<h1>📱 Mobile Recommendation System</h1>
+
+<h2>Login</h2>
+
+<form method="POST">
+
+<input name="username" placeholder="Username" required>
+<br>
+<input name="password" type="password" placeholder="Password" required>
+<br>
+
+<button type="submit">Login</button>
+
+</form>
+
+<h3>Register</h3>
+
+<form action="/register" method="POST">
+
+<input name="username" placeholder="Username" required>
+<br>
+<input name="password" type="password" placeholder="Password" required>
+<br>
+
+<button>Register</button>
+
+</form>
+
+{% endif %}
+
+{% if page=="dashboard" %}
+
+<h1>📱 Mobile Recommendation Dashboard</h1>
+
+<a href="/logout">
+<button>Logout</button>
+</a>
+
+<button onclick="darkMode()">🌙 Dark Mode</button>
+
+<hr>
+
+<h2>🔎 Search Phone</h2>
+
+<form method="POST">
+
+<input type="hidden" name="action" value="search">
+
+<input id="searchBox" name="phone" placeholder="Search phone">
+
+<button>Search</button>
+
+<button type="button" onclick="startVoice()">🎤</button>
+
+</form>
+
+<div id="suggestions"></div>
+
+{% for p in phones %}
+
+<div class="card">
+
+<img src="{{p.imgURL}}">
+
+<h3>{{p.name}}</h3>
+
+<p>⭐ {{p.ratings}}</p>
+
+<p>₹ {{p.price}}</p>
+
+<a href="/add/{{p.name}}">
+<button>Add to Cart</button>
+</a>
+
+</div>
+
+{% endfor %}
+
+<hr>
+
+<h2>🤖 AI Recommended Phones</h2>
+
+{% for r in rec %}
+
+<div class="card">
+
+<img src="{{r.imgURL}}">
+
+<h3>{{r.name}}</h3>
+
+<p>⭐ {{r.ratings}}</p>
+
+<p>₹ {{r.price}}</p>
+
+<a href="/add/{{r.name}}">
+<button>Add to Cart</button>
+</a>
+
+</div>
+
+{% endfor %}
+
+<hr>
+
+<h2>💰 Budget Filter</h2>
+
+<form method="POST">
+
+<input type="hidden" name="action" value="budget">
+
+<input name="budget" placeholder="Enter Budget">
+
+<button>Search</button>
+
+</form>
+
+<hr>
+
+<h2>📱 Compare Phones</h2>
+
+<form method="POST">
+
+<input type="hidden" name="action" value="compare">
+
+<input name="phone1" placeholder="Phone 1">
+
+<input name="phone2" placeholder="Phone 2">
+
+<button>Compare</button>
+
+</form>
+
+{% if compare1 and compare2 %}
+
+<div class="compare">
+
+<div class="card">
+
+<img src="{{compare1.imgURL}}">
+<h3>{{compare1.name}}</h3>
+<p>⭐ {{compare1.ratings}}</p>
+<p>₹ {{compare1.price}}</p>
+
+</div>
+
+<div class="card">
+
+<img src="{{compare2.imgURL}}">
+<h3>{{compare2.name}}</h3>
+<p>⭐ {{compare2.ratings}}</p>
+<p>₹ {{compare2.price}}</p>
+
+</div>
+
+</div>
+
+{% endif %}
+
+<hr>
+
+<h2>🛒 Cart</h2>
+
+<div class="cart">
+
+{% for c in cart %}
+
+<p>{{c.name}} - ₹{{c.price}}
+
+<a href="/remove/{{c.name}}">
+<button>Remove</button>
+</a>
+
+</p>
+
+{% endfor %}
+
+</div>
+
+<hr>
+
+<h2>📊 Top Rated Phones</h2>
+
+{% for t in top %}
+
+<div class="card">
+
+<img src="{{t.imgURL}}">
+<h3>{{t.name}}</h3>
+<p>⭐ {{t.ratings}}</p>
+<p>₹ {{t.price}}</p>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+</div>
+
+<script>
+
+function darkMode(){
+document.body.classList.toggle("dark");
+}
+
+function startVoice(){
+
+const recognition = new webkitSpeechRecognition();
+
+recognition.onresult=function(event){
+
+document.getElementById("searchBox").value=
+event.results[0][0].transcript;
+
+};
+
+recognition.start();
+
+}
+
+let search=document.getElementById("searchBox")
+
+if(search){
+
+search.addEventListener("keyup",function(){
+
+let query=this.value
+
+fetch("/suggest?term="+query)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+let box=document.getElementById("suggestions")
+
+box.innerHTML=""
+
+data.forEach(function(item){
+
+let div=document.createElement("div")
+
+div.innerHTML=item
+
+div.onclick=function(){
+
+document.getElementById("searchBox").value=item
+box.innerHTML=""
+
+}
+
+box.appendChild(div)
+
+})
+
+})
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
